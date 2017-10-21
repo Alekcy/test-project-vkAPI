@@ -1,35 +1,66 @@
+<style>
+    input{
+        width: 100%;
+    }
+    button{
+        width: 100%;
+    }
+    .card-panel{
+        height: 50px!important;
+    }
+    #domain{
+        font-weight: 700;
+    }
+</style>
 <template>
-	<div></div>
+    <div class="row">
+        <div class="row">
+            <div class="col s12">
+                <p>Введите ссылку на сообщество/группу ВК. Например, https://vk.com/extrawebdev</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col m8 s12">
+                <input v-model="searchText" type="text" name="">
+            </div>
+            <div class="col m4 s12">
+                <button v-on:click="clickSearchBtn" class="btn waves-effect waves-light btn-primary">ПОИСК</button>
+            </div>
+        </div>
+        <div class="row">
+             <div class="col s12 card-panel purple accent-4 ">
+                 <p class="white-text">Посты из <span id="domain">{{domain}}</span></p>
+             </div>
+        </div>
+    </div>
+   
 </template>
 <script>
-import axios from 'axios';
 export default{
-	mounted:function(){
-        this.request();
+    data:function(){
+        return{
+            searchText:""
+        }
+    },
+    computed:{
+        domain(){
+            return this.$store.state.domain
+        }
     },
     methods:{
-        request:function(){
-            let jsonpAdapter = require('axios-jsonp');
-            axios({
-                  url: 'https://api.vk.com/method/wall.get?domain=extrawebdev&count=20&access_token=c5c9f7d6c5c9f7d6c5c9f7d64dc596f125cc5c9c5c9f7d69c23f0c128cea96b8a24d873&v=5.68',
-                  adapter: jsonpAdapter
-            })
-            .then(response => {
-             // let resp = JSON.parse(response);
-              console.log(response);
-
-              this.$store.state.data = response.data.response.items;
-              this.$store.state.dataIsSet = true;
-              response.data.response.items.forEach(function(item){
-              		console.log(item);	
-              		
-
-              });
-            })
-            .catch(e => {
-              console.log(e);
-            })
-            
+        clickSearchBtn:function(){
+            if(this.searchText!==""){
+                if(this.searchText.lastIndexOf("/")!==-1){
+                    let domain = this.findDomainInStr(this.searchText);
+                    this.$store.commit('changeDomain',domain);
+                    this.$store.commit('removeAllData');
+                    this.$emit('load');
+                    this.searchText = "";
+                }
+            }
+        },
+        findDomainInStr:function(str){
+            return str.substr(str.lastIndexOf("/")+1);
         }
     }
 }
